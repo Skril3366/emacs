@@ -25,6 +25,7 @@
 (setq visible-bell nil)
 (column-number-mode)
 (global-display-line-numbers-mode t)
+(global-hl-line-mode) ; add cursor line
 
 ;; Set up different location for custom configuration file that emacs rewrites
 ;; automatically
@@ -231,6 +232,7 @@
         ("book" . ?b)
         ("software" . ?S)
         ("game" . ?G)
+        ("cloth" . ?c)
         ; Music actions
         ("fix" . ?F)
         ("download" . ?d)
@@ -253,13 +255,11 @@
     (setq org-capture-templates
           '(
             ("i" "Inbox" entry (file "~/Personal Library/Org/Desktop.org")
-             "* INBOX %^{Inbox item}\n:PROPERTIES:\n:CREATED :%U\n:END:\n %^{Additional information}")
-            ("l" "Inbox with link" entry (file"~/Personal Library/Org/Desktop.org")
-             "* INBOX %?\n :PROPERTIES:\n :CREATED: %U\n :END:\n %A")
+             "* INBOX %?\n:PROPERTIES:\n:CREATED :%U\n:END:\n")
             )
           )
-    (add-to-list 'org-structure-template-alist
-        '("i" . "* INBOX %^{Inbox item}\n:PROPERTIES:\n:CREATED :%U\n:END:\n %^{Additional information}"))
+    ;; (add-to-list 'org-structure-template-alist
+    ;;     '("i" . "* INBOX %^{Inbox item}\n:PROPERTIES:\n:CREATED :%U\n:END:\n %^{Additional information}"))
 )
 
 (defun skril/org-headings-setup()
@@ -494,7 +494,7 @@
 ; ----------------------------------- UI --------------------------------------
 
 
-(set-face-attribute 'default nil :height 170 :font "Fira Mono")
+(set-face-attribute 'default nil :height 150 :font "Fira Mono")
 ;; (set-frame-parameter (selected-frame) 'alpha 93)
 ;; (add-to-list 'default-frame-alist '(alpha  93))
 
