@@ -8,6 +8,7 @@
 (add-hook 'emacs-startup-hook #'skril/display-startup-time)
 
 
+
 ; ----------------------- General settings ------------------------------------
 (defalias 'yes-or-no-p 'y-or-n-p) ; use y-n instead of yes-no
 (global-auto-revert-mode t) ;; hot reload files
@@ -32,8 +33,18 @@
 (setq custom-file (locate-user-emacs-file "custom-vars.el"))
 (load custom-file 'noerror 'nomessage)
 
-; 
+ 
 (add-hook 'text-mode-hook 'visual-line-mode)
+
+;; scroll one line at a time (less "jumpy" than defaults)
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+(setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+(setq redisplay-dont-pause t
+  scroll-margin 1
+  scroll-step 1
+  scroll-conservatively 10000
+  scroll-preserve-screen-position 1)
 
 ; ---------------------- Package management -----------------------------------
 (require 'package)
@@ -59,6 +70,9 @@
 
 ; ------------------------ Key bindings ---------------------------------------
 
+;; (use-package company
+;;   :after ???
+;;   :hoop ())
 
 
 ; Evil mode - emulation of vim
@@ -78,7 +92,7 @@
 
 ; (defun skril/evil-hook ()
 ;   (dolist (mode
-;             '(custom-mode
+;             '(custom-mod
 ;               eshell-mode
 ;               git-rebase-mode
 ;               erc-mode
@@ -129,7 +143,8 @@
 		"u" 'org-agenda-bulk-action
 		"lb" 'counsel-bookmark
 		"m" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/init.el")))
-		"o" 'counsel-find-file
+		"o" 'counsel-fin-file
+		"ll" 'org-open-at-point-global
 		;; "f" '(lambda () (interactive) (org-ql-search 'org-agenda-files))
 		"s" 'swiper )
 )
@@ -226,28 +241,55 @@
 
 (defun skril/org-tags-setup ()
     (setq org-tag-alist '(
-        ; Content
-        ("music" . ?m)
-        ("film" . ?f)
-        ("book" . ?b)
-        ("software" . ?S)
-        ("game" . ?G)
-        ("cloth" . ?c)
-        ; Music actions
-        ("fix" . ?F)
-        ("download" . ?d)
-        ; Areas
-        ("work" . ?w)
-        ("study" . ?s)
-        ("people" . ?p)
-        ; Actions
-        ("think" . ?t)
-        ("goal" . ?g)
-        ("buy" . ?B)
-        ("note" . ?n)
-        ; Other
-        ("relevant" . ?r)
-        ("project" . ?P)
+	 ; Types of content
+	(:startgroup)
+	    ("music" . ?m)
+	    ("film" . ?f)
+	    ("book" . ?b)
+	    ("game" . ?g)
+	    ("software" . ?s)
+	    ("habit" . ?h)
+	    ("article" . ?a)
+	    ("funny_videos" . ?v)
+	    ("places" . ?p)
+	(:endgroup)
+	(:startgroup)
+	    ("idea" . ?I) ; something complete
+	    ("thought" . ?T) ; to further think and develop
+	(:endgroup)
+	; Context
+	(:startgroup)
+	    ("@work" . ?W)
+	    ("@room" . ?R)
+	    ("@kazan" . ?k)
+	    ("quick" . ?q) ; less than 10 minutes
+	    ("dude" . ?D) ; from, a hard task, can be done in the morning
+	    ("launchpad" . ?l)
+	(:endgroup)
+	 ; Actions
+	(:startgroup)
+	    ("study" . ?S)
+	    ("research" . ?r)
+	    ("think" . ?t)
+	    ("buy" . ?B)
+	    ("fix" . ?F)
+	    ("download" . ?d)
+	(:endgroup)
+	; Spheres of life
+	(:startgroup)
+	    ("cloth" . ?c)
+	    ("finance" . ?M)
+	    ("psychology" . ?P)
+	    ("health" . ?H)
+	    ("goal" . ?G)
+	(:endgroup)
+	; Eisenhower matrix
+	(:startgroup)
+	    ("important" . ?i)
+	    ; ("not_important" . ?ni)
+	    ("urgent" . ?u)
+	    ; ("not_urgent" . ?nu)
+	(:endgroup)
     ))
 )
 
@@ -258,8 +300,6 @@
              "* INBOX %?\n:PROPERTIES:\n:CREATED :%U\n:END:\n")
             )
           )
-    ;; (add-to-list 'org-structure-template-alist
-    ;;     '("i" . "* INBOX %^{Inbox item}\n:PROPERTIES:\n:CREATED :%U\n:END:\n %^{Additional information}"))
 )
 
 (defun skril/org-headings-setup()
@@ -298,100 +338,202 @@
 
 (defun skril/org-todo-setup ()
     (setq org-todo-keywords '(
-        (sequence "INBOX(i)" "PROJECTS(p)" "SOMEDAY(s)" "TODO(t)" "WAITING(w)" "CALENDAR(c)" "|" "DONE(d)" "CANCELLED(x)")
+	(sequence
+	    "INBOX(i)"
+	    "RELEVANT(r)"
+	    "SOMEDAY(s)"
+	    "NOTES(n)"
+	    "CONTENT(c)"
+	    "WAITING(w)"
+	    "PROJECTS(p)"
+	    "TODO(t)"
+	    "|"
+	    "DONE(d)"
+	    "TRASH(x)")
     ))
+    (setq skril/colors-white "white smoke")
+    (setq skril/colors-yellow "gold")
+    (setq skril/colors-purple "dark violet")
+    (setq skril/colors-gray "slate gray")
+    (setq skril/colors-green "forest green")
+    (setq skril/colors-orange "light coral")
+
     (setq org-todo-keyword-faces '(
         ("INBOX" . "white smoke")
-        ("PROJECTS" . "yellow green")
-        ("SOMEDAY" . "coral")
-        ("TODO" . "gold")
+	("RELEVANT" ."dark violet")
+        ("SOMEDAY" . "light coral")
+	("NOTES" . "forest green")
+	("CONTENT" . "light coral")
         ("WAITING" . "dark violet")
-        ("CALENDAR" . "light sea green")
+        ("PROJECTS" . "forest green")
+        ("TODO" . "gold")
         ("DONE" . "slate gray")
-        ("CANCELLED" . "slate gray")
+        ("TRASH" . "slate gray")
         )
     )
 )
 
 (defun skril/org-views-setup ()
-    (setq org-agenda-custom-commands '(
-        ("m" "Music entries" (
-             (org-ql-block
-                '(and(tags "music") (tags "fix"))
-                ((org-ql-block-header "Fix"))
-                )
-              (org-ql-block
-                 '(and (todo "TODO")
-                      (and (tags "music") (tags "download"))
-                 )
-                 ((org-ql-block-header "TODO music download"))
-                )
-             (org-ql-block
-                '(and (todo "SOMEDAY")
-                     (and (tags "music") (tags "download"))
-                     )
-                  ((org-ql-block-header "SOMEDAY music download"))
-                  )
-              )
-         )
-        ("f" "FILMS" (
-                  (org-ql-block
-                    '(and (tags "film")
-                          (not (or (todo "DONE") (todo "CANCELLED"))))
-                    ((org-ql-block-header "Films")))
-              ))
-        ("b" "BOOKS"
-         ((org-ql-block '(and (tags "book") (not (or (todo "DONE") (todo "CANCELLED"))))
-                    ((org-ql-block-header "Books")))
-              ))
-        ("c" "CONTENT"
-         ((org-ql-block '(and (tags "content") (not (or (todo "DONE") (todo "CANCELLED"))))
-                    ((org-ql-block-header "Inbox")))
-              ))
-        ("s" "SOMEDAY without music"
-            ((org-ql-block '(and(todo "SOMEDAY") (not (and (tags "music") (tags "download")) ))
-                    ((org-ql-block-header "SOMEDAY without music")))
-              ))
-        ("i" "Inbox"
-            ((org-ql-block '(todo "INBOX")
-                    ((org-ql-block-header "Inbox")))
-              ))
-        ("x" "Todo entries"
+  (setq org-agenda-custom-commands
+	'(
+	  ("mf" "Music fix"
+	   (
+	    (org-ql-block
+	     '(and
+	       (tags "music")
+	       (tags "fix")
+	       (not (done)))
+	     ((org-ql-block-header "Fix")))
+	   ))
+	  ("md" "Music download"
+	   (
+	   (org-ql-block
+	     '(and
+	       (tags "music")
+	       (tags "download")
+	       (todo "TODO"))
+	     ((org-ql-block-header "TODO")))
+	   (org-ql-block
+	     '(and
+	       (tags "music")
+	       (tags "download")
+	       (todo "RELEVANT"))
+	     ((org-ql-block-header "Relevant")))
+	   (org-ql-block
+	     '(and
+	       (tags "music")
+	       (tags "download")
+	       (todo "CONTENT"))
+	     ((org-ql-block-header "Other")))
+	   ))
+	  ("mm" "Music entries"
+	   (
+	   (org-ql-block
+	     '(and
+	       (tags "music")
+	       (not (tags "download"))
+	       (not (tags "fix"))
+	       (todo "TODO"))
+	     ((org-ql-block-header "TODO")))
+	   (org-ql-block
+	     '(and
+	       (tags "music")
+	       (not (tags "download"))
+	       (not (tags "fix"))
+	       (todo "RELEVANT"))
+	     ((org-ql-block-header "Relevant")))
+	   (org-ql-block
+	     '(and
+	       (tags "music")
+	       (not (done))
+	       (not (tags "download"))
+	       (not (tags "fix"))
+	       (not (todo "TODO"))
+	       (not (todo "RELEVANT")))
+	     ((org-ql-block-header "Other")))
+	   ))
+        ("cf" "Films"
          (
-            (org-ql-block '(and (priority "A")
-                    (todo "TODO"))
-                    ((org-ql-block-header "Important")))
-            (org-ql-block '(and (todo "TODO")
-                    (tags "study"))
-                    ((org-ql-block-header "Study")))
-            (org-ql-block '(and (todo "TODO")
-                    (tags "work"))
-                    ((org-ql-block-header "Work")))
-            (org-ql-block '(and (todo "TODO")
-                    (tags "people"))
-                    ((org-ql-block-header "People")))
-            (org-ql-block '(and (todo "TODO")
-                    (tags "note"))
-                    ((org-ql-block-header "Notes")))
-            (org-ql-block '(and (todo "TODO")
-                    (and (or (tags "research") (tags "think")) (not (tags "study")) (not (tags "work")) (not (tags "note"))))
-                    ((org-ql-block-header "Study, research or think")))
-            (org-ql-block '(and (todo "TODO")
-                    (not (or
-                     (and (tags "music") (tags "download"))
-                     (tags "research")
-                     (tags "think")
-                     (tags "study")
-                     (tags "work")
-                     (tags "people")
-                     (tags "note"))))
-                    ((org-ql-block-header "Other")))
-            (org-ql-block '(and (todo "TODO")
-                    (and(tags "music") (tags "download")))
-                    ((org-ql-block-header "Music download")))
-            ))
-        ))
-  )
+	  (org-ql-block
+	   '(and
+	     (todo "CONTENT")
+	     (tags "film"))
+	   ((org-ql-block-header "Films")))
+	  ))
+        ("cb" "Books"
+         (
+	  (org-ql-block
+	   '(and
+	     (todo "CONTENT")
+	     (tags "book"))
+	   ((org-ql-block-header "Books")))
+	  ))
+        ("cm" "Music"
+         (
+	  (org-ql-block
+	   '(and
+	     (todo "CONTENT")
+	     (tags "music"))
+	   ((org-ql-block-header "Music")))
+	  ))
+        ("cs" "Software"
+         (
+	  (org-ql-block
+	   '(and
+	     (todo "CONTENT")
+	     (tags "software"))
+	   ((org-ql-block-header "Software")))
+	  ))
+        ("i" "Inbox"
+         (
+	  (org-ql-block
+	   '(todo "INBOX")
+	   ((org-ql-block-header "Inbox")))
+	  ))
+        ("p" "Projects"
+         (
+	  (org-ql-block
+	   '(todo "PROJECTS")
+	   ((org-ql-block-header "Projects")))
+	  ))
+        ("r" "Relevant"
+         (
+	  (org-ql-block
+	   '(todo "RELEVANT")
+	   ((org-ql-block-header "Relevant")))
+	  ))
+        ("s" "Someday"
+         (
+	  (org-ql-block
+	   '(todo "SOMEDAY")
+	   ((org-ql-block-header "Someday")))
+	  ))
+        ("n" "Notes"
+         (
+	  (org-ql-block
+	   '(todo "NOTES")
+	   ((org-ql-block-header "Notes")))
+	  ))
+	  ("w" "Waiting"
+	   (
+	    (org-ql-block
+	     '(todo "WAITING")
+	     ((org-ql-block-header "Other")))
+	    ))
+	  ("x" "Dashboard"
+	   (
+	    (org-ql-block
+	     '(and
+	       (not (done))
+	       (todo "TODO")
+	       (priority "A"))
+	     ((org-ql-block-header "Important")))
+	    (org-ql-block
+	     '(and
+	       (not (done))
+	       (todo "TODO")
+	       (priority "B"))
+	     ((org-ql-block-header "Should Do")))
+	    (org-ql-block
+	     '(and
+	       (not (done))
+	       (todo "TODO")
+	       (priority "C"))
+	     ((org-ql-block-header "May skip")))
+	    (org-ql-block
+	     '(and
+	       (not (or
+		     (done)
+		     (and (tags "music") (tags "download"))
+		     (priority "A")
+		     (priority "B")
+		     (priority "C")
+		     ))
+	       (todo "TODO"))
+	     ((org-ql-block-header "Other")))
+	    ))
+	  )))
+
 
 ; Auto-save all org-files after changing them
 (defun skril/org-autosave-setup ()
@@ -415,86 +557,112 @@
             (kbd "<RET>") 'org-agenda-switch-to
                 (kbd "\t") 'org-agenda-goto
                     "+" 'org-agenda-priority-up
-                    "," 'org-agenda-priority
                     "-" 'org-agenda-priority-down
+
                     "." 'org-agenda-goto-today
                     "0" 'evil-digit-argument-or-evil-beginning-of-line
                     ":" 'org-agenda-set-tags
-                    ";" 'org-timer-set-timer
+
                     "<" 'org-agenda-filter-by-category
                     ">" 'org-agenda-date-prompt
+
                     "a" 'org-agenda-toggle-archive-tag
                     "A" 'org-agenda-archive
+
                     "D" 'org-agenda-deadline
+                    "s" 'org-agenda-schedule
+
                     "F" 'org-agenda-follow-mode
-                    "H" 'org-agenda-holidays
-                    "I" 'helm-org-task-file-headings
                     "J" 'org-agenda-next-date-line
                     "K" 'org-agenda-previous-date-line
-                    "L" 'org-agenda-recenter
-                    "O" 'org-agenda-clock-out-avy
-                    "P" 'org-agenda-show-priority
-                    "R" 'org-agenda-clockreport-mode
+                    "L" 'org-agenda-recenter ; Show current heading in the file in the center of the screen
                     "S" 'org-save-all-org-buffers
-                    "T" 'org-agenda-show-tags
-                    "X" 'org-agenda-clock-cancel
-                    "Z" 'org-agenda-sunrise-sunset
-                    "[" 'org-agenda-manipulate-query-add
-                    "b" 'org-agenda-earlier
-                    "c" 'helm-org-capture-templates
-                    "e" 'org-agenda-set-effort
-                    "f" 'org-agenda-later
-                    "g/" 'org-agenda-filter-by-tag
-                    "gJ" 'org-agenda-clock-goto
-                    "g\\" 'org-agenda-filter-by-tag-refine
-                    "gh" 'org-agenda-holiday
-                    "gj" 'org-agenda-goto-date
                     "go" 'org-agenda-open-link
-                    "gv" 'org-agenda-view-mode-dispatch
-                    "i" 'org-agenda-clock-in-avy
+
+                    "g/" 'org-agenda-filter-by-tag
+                    "g\\" 'org-agenda-filter-by-tag-refine
+
+                    "t" 'org-agenda-todo
+
                     "j"  'org-agenda-next-line
                     "k"  'org-agenda-previous-line
                     "m" 'org-agenda-bulk-mark
-                    ;; "n" 'org-agenda-add-note
-                    "n" nil  ; evil-search-next
-                    "o" 'delete-other-windows
-                    "q" 'org-agenda-quit
+                    "C-U" 'org-agenda-bulk-unmark
+
                     "r" 'org-agenda-redo
-                    "s" 'org-agenda-schedule
-                    "t" 'org-agenda-todo
-                    "C-u" 'org-agenda-bulk-unmark
                     "u" 'org-agenda-undo
-                    "va" 'org-agenda-archives-mode
-                    "vc" 'org-agenda-show-clocking-issues
-                    "vd" 'org-agenda-day-view
-                    "vl" 'org-agenda-log-mode
-                    "vt" 'org-agenda-toggle-time-grid
-                    "vw" 'org-agenda-week-view
-                    "x" 'org-agenda-exit
-                    "y" 'org-agenda-todo-yesterday
-                    "{" 'org-agenda-manipulate-query-add-re
-                    "}" 'org-agenda-manipulate-query-subtract-re
-                    "]" 'org-agenda-manipulate-query-subtract)
+                    "q" 'org-agenda-quit
+                    "n" nil  ; evil-search-next
+
+                    ;; "H" 'org-agenda-holidays
+                    ;; "I" 'helm-org-task-file-headings
+                    ;; "O" 'org-agenda-clock-out-avy
+                    ;; "P" 'org-agenda-show-priority
+                    ;; "R" 'org-agenda-clockreport-mode
+                    ;; "T" 'org-agenda-show-tags
+                    ;; "X" 'org-agenda-clock-cancel
+                    ;; "Z" 'org-agenda-sunrise-sunset
+                    ;; "[" 'org-agenda-manipulate-query-add
+                    ;; "b" 'org-agenda-earlier
+                    ;; "c" 'helm-org-capture-templates
+                    ;; "e" 'org-agenda-set-effort
+                    ;; "f" 'org-agenda-later
+                    ;; "gJ" 'org-agenda-clock-goto
+                    ;; "gh" 'org-agenda-holiday
+                    ;; "gj" 'org-agenda-goto-date
+                    ;; "gv" 'org-agenda-view-mode-dispatch
+                    ;; "i" 'org-agenda-clock-in-avy
+                    ;; "n" 'org-agenda-add-note
+                    ;; "o" 'delete-other-windows
+                    ;; "va" 'org-agenda-archives-mode
+                    ;; "vc" 'org-agenda-show-clocking-issues
+                    ;; "vd" 'org-agenda-day-view
+                    ;; "vl" 'org-agenda-log-mode
+                    ;; "vt" 'org-agenda-toggle-time-grid
+                    ;; "vw" 'org-agenda-week-view
+                    ;; "x" 'org-agenda-exit
+                    ;; "y" 'org-agenda-todo-yesterday
+                    ;; "{" 'org-agenda-manipulate-query-add-re
+                    ;; "}" 'org-agenda-manipulate-query-subtract-re
+                    ;; "]" 'org-agenda-manipulate-query-subtract)
+		    )
         )
     )
 )
 
-; Uncomment for updating it, but it makes startup time slower
-; (use-package quelpa)
-; (use-package quelpa-use-package)
-; (use-package org-ql
-;  :defer
-;   :quelpa (org-ql
-;             :fetcher github
-;             :repo "alphapapa/org-ql"
-;             :files (:defaults (:exclude "helm-org-ql.el"))
-;             )
-;   )
+;; (use-package quelpa)
+;; (use-package quelpa-use-package)
+
+;; (use-package org-ql
+;;  :defer
+;;   :quelpa (org-ql
+;;             :fetcher github
+;;             :repo "alphapapa/org-ql"
+;;             :files (:defaults (:exclude "helm-org-ql.el"))
+;;             )
+;;   )
+
+;; (use-package org-sidebar
+;;   :quelpa (org-sidebar :fetcher github :repo "alphapapa/org-sidebar"))
+
+; TODO: understand how it works
+;; (defun skril/org-sidebar ()
+;;   "Display my Org Sidebar."
+;;   (interactive)
+;;   (org-sidebar
+;;    :sidebars (make-org-sidebar
+;;               :name "My Sidebar"
+;;               :description "My sidebar items"
+;;               :items (org-ql (org-agenda-files)
+;;                        (and (not (done))
+;;                             (or (deadline auto)
+;;                                 (scheduled :on today)))
+;;                        :action element-with-markers))))
 
 ; ----------------------------------- UI --------------------------------------
 
 
-(set-face-attribute 'default nil :height 150 :font "Fira Mono")
+(set-face-attribute 'default nil :height 170 :font "Fira Mono")
 ;; (set-frame-parameter (selected-frame) 'alpha 93)
 ;; (add-to-list 'default-frame-alist '(alpha  93))
 
@@ -503,20 +671,29 @@
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+        doom-themes-enable-italic t  ; if nil, italics is universally disabled
+	) 
   ;; (load-theme 'doom-tokyo-night t)
-  (load-theme 'doom-Iosvkem t))
+  ;; (load-theme 'doom-city-lights t))
+  (load-theme 'doom-horizon t))
 
 (use-package doom-modeline
   :ensure t
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 1)))
+  :init
+    (setq doom-modeline-height 20)
+  :hook (after-init . '(doom-modeline-mode t)))
+
+;; (use-package doom-modeline
+;;   :ensure t
+;;   ;; :init
+;;   ;; :custom ((doom-modeline-height 1))
+;;   )
 
 ; Enable custom neotree theme (all-the-icons must be installed!)
 (doom-themes-neotree-config)
 
 ; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config)
+(doom-themes-org-config)
 
 (use-package dashboard
   :ensure t
@@ -536,3 +713,10 @@
   ;:config
     ;(define-key evil-normal-state-map (kbd "C-c a") 'evil-numbers/inc-at-pt)
     ;(define-key evil-normal-state-map (kbd "C-c x") 'evil-numbers/dec-at-pt))
+
+; Code completion
+
+(use-package bug-hunter)
+(use-package auto-complete
+  :config (ac-config-default))
+(use-package relint)
