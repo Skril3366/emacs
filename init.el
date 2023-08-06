@@ -33,7 +33,6 @@
 (setq custom-file (locate-user-emacs-file "custom-vars.el"))
 (load custom-file 'noerror 'nomessage)
 
- 
 (add-hook 'text-mode-hook 'visual-line-mode)
 
 ;; scroll one line at a time (less "jumpy" than defaults)
@@ -46,27 +45,26 @@
   scroll-conservatively 10000
   scroll-preserve-screen-position 1)
 
+
 ; ---------------------- Package management -----------------------------------
 (require 'package)
-(setq package-enable-at-startup nil)
+; (setq package-enable-at-startup nil)
 
-(add-to-list 'package-archives
-    '(
-      ("melpa-mirror" . "https://www.mirrorservice.org/sites/melpa.org/packages/")
-      ("melpa" . "https://melpa.org/packages")
-      ("Org" . "https://orgmode.org/elpa/")
-      ("elpa" . "https://elpa.gnu.org/packages/")
-      )
-    )
+(add-to-list 'package-archives '("melpa-mirror" . "https://www.mirrorservice.org/sites/melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages"))
+(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/"))
+(add-to-list 'package-archives '("elpa" . "https://elpa.gnu.org/packages/"))
 
 (package-initialize)
 
+(unless package-archive-contents
+          (package-refresh-contents))
+
 (unless (package-installed-p 'use-package)
-    (package-refresh-contents)
-    (package-install 'use-package)
-    (require 'use-package)
-    (setq use-package-always-ensure t)
-    )
+    (package-install 'use-package))
+
+(require 'use-package)
+(setq use-package-always-ensure t)
 
 ; ------------------------ Key bindings ---------------------------------------
 
@@ -90,24 +88,24 @@
     (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 )
 
-; (defun skril/evil-hook ()
-;   (dolist (mode
-;             '(custom-mod
-;               eshell-mode
-;               git-rebase-mode
-;               erc-mode
-;               term-mode
-;               )
-;             )
-;     (add-to-list 'evil-emacs-state-modes mode)))
-
-; Collection of useful keybindings for different modes, that are not handled by
-; evil package by itself
-(use-package evil-collection
-  :after evil
-  :config
-      (evil-collection-init)
-  )
+; ; (defun skril/evil-hook ()
+; ;   (dolist (mode
+; ;             '(custom-mod
+; ;               eshell-mode
+; ;               git-rebase-mode
+; ;               erc-mode
+; ;               term-mode
+; ;               )
+; ;             )
+; ;     (add-to-list 'evil-emacs-state-modes mode)))
+;
+; ; Collection of useful keybindings for different modes, that are not handled by
+; ; evil package by itself
+ (use-package evil-collection
+   :after evil
+   :config
+       (evil-collection-init)
+   )
 
 (use-package general
   :after evil
@@ -672,7 +670,7 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t  ; if nil, italics is universally disabled
-	) 
+	)
   ;; (load-theme 'doom-tokyo-night t)
   ;; (load-theme 'doom-city-lights t))
   (load-theme 'doom-horizon t))
