@@ -45,15 +45,32 @@
   scroll-conservatively 10000
   scroll-preserve-screen-position 1)
 
+; ------------------------ Useful functions -----------------------------------
+
+(defun add-list-to-list (dst src)
+        (mapcar '(lambda (e) (add-to-list dst e)) src))
+
+; ------------------------- Config Settings -----------------------------------
+
+(defvar settings-org-folder "~/Personal Library/Personal/Org/" "Location of all the org files")
+(defvar settings-capture-file-name "Work.org" "Name of the file in org folder to which inbox entries are written")
+(defvar settings-archive-file-name "Archive.org" "Name of the file in org folder to which to archive")
+
+
+(setq settings-capture-file (concat settings-org-folder settings-capture-file-name))
+(setq settings-archive-file (concat settings-org-folder settings-archive-file-name))
+; (setq settings-archive-file '(concat settings-org-folder "Archive.org"))
+
 
 ; ---------------------- Package management -----------------------------------
 (require 'package)
-; (setq package-enable-at-startup nil)
 
-(add-to-list 'package-archives '("melpa-mirror" . "https://www.mirrorservice.org/sites/melpa.org/packages/") t)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages"))
-(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/"))
-(add-to-list 'package-archives '("elpa" . "https://elpa.gnu.org/packages/"))
+(add-list-to-list 'package-archives
+      (list
+        '("melpa-mirror" . "https://www.mirrorservice.org/sites/melpa.org/packages/")
+        '("melpa" . "https://melpa.org/packages")
+        '("org" . "https://orgmode.org/elpa/")
+        '("elpa" . "https://elpa.gnu.org/packages/")))
 
 (package-initialize)
 
@@ -67,11 +84,6 @@
 (setq use-package-always-ensure t)
 
 ; ------------------------ Key bindings ---------------------------------------
-
-;; (use-package company
-;;   :after ???
-;;   :hoop ())
-
 
 ; Evil mode - emulation of vim
 (use-package evil
@@ -88,17 +100,6 @@
     (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 )
 
-; ; (defun skril/evil-hook ()
-; ;   (dolist (mode
-; ;             '(custom-mod
-; ;               eshell-mode
-; ;               git-rebase-mode
-; ;               erc-mode
-; ;               term-mode
-; ;               )
-; ;             )
-; ;     (add-to-list 'evil-emacs-state-modes mode)))
-;
 ; ; Collection of useful keybindings for different modes, that are not handled by
 ; ; evil package by itself
  (use-package evil-collection
@@ -182,7 +183,6 @@
   :init
   (ivy-rich-mode 1))
 
-; TODO: Understand what is it
 (use-package counsel
     :bind
         (("M-x" . counsel-M-x)
@@ -261,7 +261,7 @@
 	    ("@room" . ?R)
 	    ("@kazan" . ?k)
 	    ("quick" . ?q) ; less than 10 minutes
-	    ("dude" . ?D) ; from, a hard task, can be done in the morning
+	    ("dude" . ?D) ; dude = frog,  a hard task, can be done in the morning
 	    ("launchpad" . ?l)
 	(:endgroup)
 	 ; Actions
@@ -284,21 +284,14 @@
 	; Eisenhower matrix
 	(:startgroup)
 	    ("important" . ?i)
-	    ; ("not_important" . ?ni)
 	    ("urgent" . ?u)
-	    ; ("not_urgent" . ?nu)
-	(:endgroup)
-    ))
-)
+	(:endgroup))))
 
 (defun skril/org-templates-setup ()
     (setq org-capture-templates
           '(
-            ("i" "Inbox" entry (file "~/Personal Library/Org/Desktop.org")
-             "* INBOX %?\n:PROPERTIES:\n:CREATED :%U\n:END:\n")
-            )
-          )
-)
+            ("i" "Inbox" entry (file settings-capture-file)
+             "* INBOX %?\n:PROPERTIES:\n:CREATED :%U\n:END:\n"))))
 
 (defun skril/org-headings-setup()
     (dolist (face '(
@@ -314,62 +307,44 @@
         (set-face-attribute (car face) nil
             :font "Fira Mono"
             :weight 'bold
-            :height (cdr face)
-        )
-    )
-)
+            :height (cdr face))))
 
 (defun skril/org-files-setup ()
-    (setq org-archive-location
-          "~/Personal Library/Org/Archive.org::Archived entries from file %s")
-    (setq org-agenda-files
-        (list
-            "~/Personal Library/Org/Desktop.org"
-            "~/Personal Library/Org/Phone.org"
-            "~/Personal Library/Org/Projects.org"
-            "~/Personal Library/Org/Matepad.org"
-            "~/Personal Library/Org/Birthdays.org"
-            )
-        )
-    (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
-)
+    (setq org-archive-location (concat settings-archive-file "::Archived entries from file %s"))
+    (add-to-list 'org-agenda-files (expand-file-name settings-org-folder))
+    (setq org-refile-targets '((org-agenda-files :maxlevel . 3))))
 
 (defun skril/org-todo-setup ()
     (setq org-todo-keywords '(
-	(sequence
-	    "INBOX(i)"
-	    "RELEVANT(r)"
-	    "SOMEDAY(s)"
-	    "NOTES(n)"
-	    "CONTENT(c)"
-	    "WAITING(w)"
-	    "PROJECTS(p)"
-	    "TODO(t)"
-	    "|"
-	    "DONE(d)"
-	    "TRASH(x)")
-    ))
+      (sequence
+          "INBOX(i)"
+          "RELEVANT(r)"
+          "SOMEDAY(s)"
+          "NOTES(n)"
+          "CONTENT(c)"
+          "WAITING(w)"
+          "PROJECTS(p)"
+          "TODO(t)"
+          "|"
+          "DONE(d)"
+          "TRASH(x)")))
     (setq skril/colors-white "white smoke")
     (setq skril/colors-yellow "gold")
     (setq skril/colors-purple "dark violet")
     (setq skril/colors-gray "slate gray")
     (setq skril/colors-green "forest green")
     (setq skril/colors-orange "light coral")
-
     (setq org-todo-keyword-faces '(
         ("INBOX" . "white smoke")
-	("RELEVANT" ."dark violet")
+        ("RELEVANT" ."dark violet")
         ("SOMEDAY" . "light coral")
-	("NOTES" . "forest green")
-	("CONTENT" . "light coral")
+        ("NOTES" . "forest green")
+        ("CONTENT" . "light coral")
         ("WAITING" . "dark violet")
         ("PROJECTS" . "forest green")
         ("TODO" . "gold")
         ("DONE" . "slate gray")
-        ("TRASH" . "slate gray")
-        )
-    )
-)
+        ("TRASH" . "slate gray"))))
 
 (defun skril/org-views-setup ()
   (setq org-agenda-custom-commands
@@ -544,8 +519,7 @@
     (add-hook 'org-agenda-schedule :after 'org-save-all-buffers)
     (advice-add 'org-agenda-quit :before 'org-save-all-org-buffers)
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
-    (add-hook 'org-capture-after-finilize-hook :after 'org-save-all-buffers)
-)
+    (add-hook 'org-capture-after-finilize-hook :after 'org-save-all-buffers))
 
 (with-eval-after-load 'org
     (eval-after-load 'org-agenda
@@ -623,46 +597,12 @@
                     ;; "{" 'org-agenda-manipulate-query-add-re
                     ;; "}" 'org-agenda-manipulate-query-subtract-re
                     ;; "]" 'org-agenda-manipulate-query-subtract)
-		    )
-        )
-    )
-)
-
-;; (use-package quelpa)
-;; (use-package quelpa-use-package)
-
-;; (use-package org-ql
-;;  :defer
-;;   :quelpa (org-ql
-;;             :fetcher github
-;;             :repo "alphapapa/org-ql"
-;;             :files (:defaults (:exclude "helm-org-ql.el"))
-;;             )
-;;   )
-
-;; (use-package org-sidebar
-;;   :quelpa (org-sidebar :fetcher github :repo "alphapapa/org-sidebar"))
-
-; TODO: understand how it works
-;; (defun skril/org-sidebar ()
-;;   "Display my Org Sidebar."
-;;   (interactive)
-;;   (org-sidebar
-;;    :sidebars (make-org-sidebar
-;;               :name "My Sidebar"
-;;               :description "My sidebar items"
-;;               :items (org-ql (org-agenda-files)
-;;                        (and (not (done))
-;;                             (or (deadline auto)
-;;                                 (scheduled :on today)))
-;;                        :action element-with-markers))))
+		    ))))
 
 ; ----------------------------------- UI --------------------------------------
 
 
 (set-face-attribute 'default nil :height 170 :font "Fira Mono")
-;; (set-frame-parameter (selected-frame) 'alpha 93)
-;; (add-to-list 'default-frame-alist '(alpha  93))
 
 (use-package doom-themes
   :ensure t
@@ -671,7 +611,7 @@
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t  ; if nil, italics is universally disabled
 	)
-  ;; (load-theme 'doom-tokyo-night t)
+  ;; (load-theme 'doom-tokyo-night t))
   ;; (load-theme 'doom-city-lights t))
   (load-theme 'doom-horizon t))
 
@@ -680,12 +620,6 @@
   :init
     (setq doom-modeline-height 20)
   :hook (after-init . '(doom-modeline-mode t)))
-
-;; (use-package doom-modeline
-;;   :ensure t
-;;   ;; :init
-;;   ;; :custom ((doom-modeline-height 1))
-;;   )
 
 ; Enable custom neotree theme (all-the-icons must be installed!)
 (doom-themes-neotree-config)
@@ -715,6 +649,8 @@
 ; Code completion
 
 (use-package bug-hunter)
+(use-package lispy
+  :config (add-hook 'emacs-lisp-mode-hook #'lispy-mode))
 (use-package auto-complete
   :config (ac-config-default))
 (use-package relint)
