@@ -52,7 +52,7 @@
 
 ; ------------------------- Config Settings -----------------------------------
 
-(defvar settings-org-folder "~/Personal Library/Personal/Org/" "Location of all the org files")
+(defvar settings-org-folder "~/Vault/Personal/Org/" "Location of all the org files")
 (defvar settings-capture-file-name "Work.org" "Name of the file in org folder to which inbox entries are written")
 (defvar settings-archive-file-name "Archive.org" "Name of the file in org folder to which to archive")
 
@@ -213,29 +213,10 @@
 
 ; ----------------------------------- Org mode --------------------------------
 
-(use-package org
-    :commands
-        (org-capture org-agenda)
-    :config
-        (org-indent-mode)
-        (visual-line-mode 1)
-        (setq evil-auto-indent nil)
-        (setq org-ellipsis " ▾")
-        (setq org-agenda-start-with-log-mode t)
-        (setq org-log-done 'time)
-        (setq org-log-into-drawer t)
-        (skril/org-mode-setup)
-)
-
-(defun skril/org-mode-setup ()
-    (skril/org-tags-setup)
-    (skril/org-headings-setup)
-    (skril/org-templates-setup)
-    (skril/org-files-setup)
-    (skril/org-todo-setup)
-    (skril/org-views-setup)
-    (skril/org-autosave-setup)
-)
+;; (use-package quelpa-use-package)
+;; (use-package org-ql
+;;   :quelpa (org-ql :fetcher github :repo "alphapapa/org-ql"
+;;             :files (:defaults (:exclude "helm-org-ql.el"))))
 
 (defun skril/org-tags-setup ()
     (setq org-tag-alist '(
@@ -248,7 +229,7 @@
 	    ("software" . ?s)
 	    ("habit" . ?h)
 	    ("article" . ?a)
-	    ("funny_videos" . ?v)
+	    ("videos" . ?v)
 	    ("places" . ?p)
 	(:endgroup)
 	(:startgroup)
@@ -260,9 +241,10 @@
 	    ("@work" . ?W)
 	    ("@room" . ?R)
 	    ("@kazan" . ?k)
+	    ("@laptop" . ?l)
 	    ("quick" . ?q) ; less than 10 minutes
 	    ("dude" . ?D) ; dude = frog,  a hard task, can be done in the morning
-	    ("launchpad" . ?l)
+	    ("launchpad" . ?L)
 	(:endgroup)
 	 ; Actions
 	(:startgroup)
@@ -280,11 +262,6 @@
 	    ("psychology" . ?P)
 	    ("health" . ?H)
 	    ("goal" . ?G)
-	(:endgroup)
-	; Eisenhower matrix
-	(:startgroup)
-	    ("important" . ?i)
-	    ("urgent" . ?u)
 	(:endgroup))))
 
 (defun skril/org-templates-setup ()
@@ -321,7 +298,7 @@
           "RELEVANT(r)"
           "SOMEDAY(s)"
           "NOTES(n)"
-          "CONTENT(c)"
+          "LIST(l)"
           "WAITING(w)"
           "PROJECTS(p)"
           "TODO(t)"
@@ -339,7 +316,7 @@
         ("RELEVANT" ."dark violet")
         ("SOMEDAY" . "light coral")
         ("NOTES" . "forest green")
-        ("CONTENT" . "light coral")
+        ("LIST" . "royal blue")
         ("WAITING" . "dark violet")
         ("PROJECTS" . "forest green")
         ("TODO" . "gold")
@@ -376,7 +353,7 @@
 	     '(and
 	       (tags "music")
 	       (tags "download")
-	       (todo "CONTENT"))
+	       (todo "LIST"))
 	     ((org-ql-block-header "Other")))
 	   ))
 	  ("mm" "Music entries"
@@ -409,7 +386,7 @@
          (
 	  (org-ql-block
 	   '(and
-	     (todo "CONTENT")
+	     (todo "LIST")
 	     (tags "film"))
 	   ((org-ql-block-header "Films")))
 	  ))
@@ -417,7 +394,7 @@
          (
 	  (org-ql-block
 	   '(and
-	     (todo "CONTENT")
+	     (todo "LIST")
 	     (tags "book"))
 	   ((org-ql-block-header "Books")))
 	  ))
@@ -425,7 +402,7 @@
          (
 	  (org-ql-block
 	   '(and
-	     (todo "CONTENT")
+	     (todo "LIST")
 	     (tags "music"))
 	   ((org-ql-block-header "Music")))
 	  ))
@@ -433,7 +410,7 @@
          (
 	  (org-ql-block
 	   '(and
-	     (todo "CONTENT")
+	     (todo "LIST")
 	     (tags "software"))
 	   ((org-ql-block-header "Software")))
 	  ))
@@ -520,6 +497,31 @@
     (advice-add 'org-agenda-quit :before 'org-save-all-org-buffers)
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
     (add-hook 'org-capture-after-finilize-hook :after 'org-save-all-buffers))
+
+(defun skril/org-mode-setup ()
+    (skril/org-tags-setup)
+    (skril/org-headings-setup)
+    (skril/org-templates-setup)
+    (skril/org-files-setup)
+    (skril/org-todo-setup)
+    (skril/org-views-setup)
+    (skril/org-autosave-setup))
+
+(use-package org
+    :commands
+        (org-capture org-agenda)
+    :config
+        (org-indent-mode)
+        (visual-line-mode 1)
+        (setq evil-auto-indent nil)
+        (setq org-ellipsis " ▾")
+        (setq org-agenda-start-with-log-mode t)
+        (setq org-log-done 'time)
+        (setq org-log-into-drawer t)
+        (skril/org-mode-setup)
+)
+
+
 
 (with-eval-after-load 'org
     (eval-after-load 'org-agenda
