@@ -144,7 +144,6 @@
 		"m" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/init.el")))
 		"o" 'counsel-fin-file
 		"ll" 'org-open-at-point-global
-		;; "f" '(lambda () (interactive) (org-ql-search 'org-agenda-files))
 		"s" 'swiper )
 )
 
@@ -213,10 +212,6 @@
 
 ; ----------------------------------- Org mode --------------------------------
 
-;; (use-package quelpa-use-package)
-;; (use-package org-ql
-;;   :quelpa (org-ql :fetcher github :repo "alphapapa/org-ql"
-;;             :files (:defaults (:exclude "helm-org-ql.el"))))
 
 (defun skril/org-tags-setup ()
     (setq org-tag-alist '(
@@ -327,160 +322,67 @@
   (setq org-agenda-custom-commands
 	'(
 	  ("mf" "Music fix"
-	   (
-	    (org-ql-block
-	     '(and
-	       (tags "music")
-	       (tags "fix")
-	       (not (done)))
-	     ((org-ql-block-header "Fix")))
-	   ))
+	   ((tags-todo "+music+fix"
+		       ((org-agenda-overriding-header "Fix")))))
 	  ("md" "Music download"
-	   (
-	   (org-ql-block
-	     '(and
-	       (tags "music")
-	       (tags "download")
-	       (todo "TODO"))
-	     ((org-ql-block-header "TODO")))
-	   (org-ql-block
-	     '(and
-	       (tags "music")
-	       (tags "download")
-	       (todo "RELEVANT"))
-	     ((org-ql-block-header "Relevant")))
-	   (org-ql-block
-	     '(and
-	       (tags "music")
-	       (tags "download")
-	       (todo "LIST"))
-	     ((org-ql-block-header "Other")))
-	   ))
-	  ("mm" "Music entries"
-	   (
-	   (org-ql-block
-	     '(and
-	       (tags "music")
-	       (not (tags "download"))
-	       (not (tags "fix"))
-	       (todo "TODO"))
-	     ((org-ql-block-header "TODO")))
-	   (org-ql-block
-	     '(and
-	       (tags "music")
-	       (not (tags "download"))
-	       (not (tags "fix"))
-	       (todo "RELEVANT"))
-	     ((org-ql-block-header "Relevant")))
-	   (org-ql-block
-	     '(and
-	       (tags "music")
-	       (not (done))
-	       (not (tags "download"))
-	       (not (tags "fix"))
-	       (not (todo "TODO"))
-	       (not (todo "RELEVANT")))
-	     ((org-ql-block-header "Other")))
-	   ))
-        ("cf" "Films"
-         (
-	  (org-ql-block
-	   '(and
-	     (todo "LIST")
-	     (tags "film"))
-	   ((org-ql-block-header "Films")))
-	  ))
-        ("cb" "Books"
-         (
-	  (org-ql-block
-	   '(and
-	     (todo "LIST")
-	     (tags "book"))
-	   ((org-ql-block-header "Books")))
-	  ))
-        ("cm" "Music"
-         (
-	  (org-ql-block
-	   '(and
-	     (todo "LIST")
-	     (tags "music"))
-	   ((org-ql-block-header "Music")))
-	  ))
-        ("cs" "Software"
-         (
-	  (org-ql-block
-	   '(and
-	     (todo "LIST")
-	     (tags "software"))
-	   ((org-ql-block-header "Software")))
-	  ))
-        ("i" "Inbox"
-         (
-	  (org-ql-block
-	   '(todo "INBOX")
-	   ((org-ql-block-header "Inbox")))
-	  ))
-        ("p" "Projects"
-         (
-	  (org-ql-block
-	   '(todo "PROJECTS")
-	   ((org-ql-block-header "Projects")))
-	  ))
-        ("r" "Relevant"
-         (
-	  (org-ql-block
-	   '(todo "RELEVANT")
-	   ((org-ql-block-header "Relevant")))
-	  ))
-        ("s" "Someday"
-         (
-	  (org-ql-block
-	   '(todo "SOMEDAY")
-	   ((org-ql-block-header "Someday")))
-	  ))
-        ("n" "Notes"
-         (
-	  (org-ql-block
-	   '(todo "NOTES")
-	   ((org-ql-block-header "Notes")))
-	  ))
-	  ("w" "Waiting"
-	   (
-	    (org-ql-block
-	     '(todo "WAITING")
-	     ((org-ql-block-header "Other")))
+	   ((tags-todo "+music+download/+TODO"
+		((org-agenda-overriding-header "TODO")))
+	    (tags-todo "+music+download/+RELEVANT"
+		((org-agenda-overriding-header "Relevant")))
+	    (tags-todo "+music+download/+LIST"
+		       ((org-agenda-overriding-header "Other")))
 	    ))
+	  ("mm" "Music entries"
+	   ((tags-todo "+music-download-fix"
+		((org-agenda-overriding-header "Music entries")))
+	    ))
+	  ("lf" "Films"
+	   ((tags-todo "+film/+LIST"
+		((org-agenda-overriding-header "LIST")))
+	   (tags-todo "+film/-LIST"
+		      ((org-agenda-overriding-header "Other")))
+	   ))
+	  ("lb" "Books"
+	   ((tags-todo "+book/+LIST"
+		((org-agenda-overriding-header "LIST")))
+	   (tags-todo "+book/-LIST"
+		      ((org-agenda-overriding-header "Other")))
+	   ))
+	  ("i" "Inbox"
+	   ((tags-todo "/+INBOX"
+		((org-agenda-overriding-header "Inbox")))
+	   ))
+	  ("p" "Projects"
+	   ((tags-todo "/+PROJECTS"
+		((org-agenda-overriding-header "Projects")))
+	   ))
+	  ("r" "Relevant"
+	   ((tags-todo "/+RELEVANT"
+		((org-agenda-overriding-header "Relevant")))
+	   ))
+	  ("s" "Someday"
+	   ((tags-todo "/+SOMEDAY"
+		((org-agenda-overriding-header "SOMEDAY")))
+	   ))
+	  ("n" "Notes"
+	   ((tags-todo "/+NOTES"
+		((org-agenda-overriding-header "Notes")))
+	   ))
+	  ("w" "Waiting"
+	   ((tags-todo "/+WAITING"
+		((org-agenda-overriding-header "Waiting")))
+	   ))
 	  ("x" "Dashboard"
 	   (
-	    (org-ql-block
-	     '(and
-	       (not (done))
-	       (todo "TODO")
-	       (priority "A"))
-	     ((org-ql-block-header "Important")))
-	    (org-ql-block
-	     '(and
-	       (not (done))
-	       (todo "TODO")
-	       (priority "B"))
-	     ((org-ql-block-header "Should Do")))
-	    (org-ql-block
-	     '(and
-	       (not (done))
-	       (todo "TODO")
-	       (priority "C"))
-	     ((org-ql-block-header "May skip")))
-	    (org-ql-block
-	     '(and
-	       (not (or
-		     (done)
-		     (and (tags "music") (tags "download"))
-		     (priority "A")
-		     (priority "B")
-		     (priority "C")
-		     ))
-	       (todo "TODO"))
-	     ((org-ql-block-header "Other")))
+	    (tags-todo "+PRIORITY=\"A\"/+TODO"
+		((org-agenda-overriding-header "Important")))
+	    (tags-todo "+PRIORITY=\"B\"/+TODO"
+		((org-agenda-overriding-header "Should Do")))
+	    (tags-todo "+PRIORITY=\"C\"/+TODO"
+		((org-agenda-overriding-header "May skip")))
+	    (tags-todo "/+PROJECTS"
+		((org-agenda-overriding-header "Projects")))
+	    (agenda "" ((org-deadline-warning-days 7)))
 	    ))
 	  )))
 
